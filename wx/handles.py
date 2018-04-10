@@ -88,18 +88,18 @@ def add_day_handle(user_id, user_input, user_input_before):
         return '输入天数格式错误'
 
     user = UserInfo()
-    user.game_id = user_input_before['game_id']
+    user.game_id = int(user_input_before['game_id'])
     data = '找不到该用户'
     if user.load():
         today_stamp = datetime.today().timestamp()
         if user.expire_time < today_stamp:
             user.expire_time = today_stamp + timedelta(days=int(user_input)).total_seconds()
         else:
-            user.expire_time += timedelta(days=int(user_input)).total_seconds()
+            user.expire_time += int(timedelta(days=int(user_input)).total_seconds())
         data = user.__data__.copy()
-        data['expire_time'] = str(date.fromtimestamp(user.expire_time))
-        data['last_login_time'] = str(date.fromtimestamp(user.last_login_time))
-        data['register_time'] = str(date.fromtimestamp(user.register_time))
+        data['expire_time'] = str(date.fromtimestamp(data.get('expire_time', 0)))
+        data['last_login_time'] = str(date.fromtimestamp(data.get('last_login_time', 0)))
+        data['register_time'] = str(date.fromtimestamp(data.get('register_time', 0)))
 
     redis_client.delete(user_id)
     return str(data)
@@ -129,9 +129,9 @@ def get_user_handle(user_id, user_input, user_input_before):
     data = '未找到对应信息'
     if user.load():
         data = user.__data__.copy()
-        data['expire_time'] = str(date.fromtimestamp(user.expire_time))
-        data['last_login_time'] = str(date.fromtimestamp(user.last_login_time))
-        data['register_time'] = str(date.fromtimestamp(user.register_time))
+        data['expire_time'] = str(date.fromtimestamp(data.get('expire_time', 0)))
+        data['last_login_time'] = str(date.fromtimestamp(data.get('last_login_time', 0)))
+        data['register_time'] = str(date.fromtimestamp(data.get('register_time', 0)))
     redis_client.delete(user_id)
     return str(data)
 

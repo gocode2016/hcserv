@@ -5,13 +5,13 @@
 # config_dev.py 覆盖 config_online.py 覆盖 config.py
 # 该文件下的config中的值仅仅用来占位，方便IDE做提示
 config = {
-    'db_host': 'localhost',
-    'redis_host': 'localhost',
-    'db_name': 'localhost',
-    'server_host': 'localhost',
-    'server_user': 'localhost',
-    'server_pswd': 'localhost',
-    'wx_token': 'localhost',
+    'db_host': '',
+    'redis_host': '',
+    'db_name': '',
+    'server_host': '',
+    'server_user': '',
+    'server_pswd': '',
+    'wx_token': '',
     'redis_pswd': '',
     'wx_admin_pswd': '',
 }

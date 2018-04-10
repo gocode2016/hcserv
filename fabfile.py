@@ -50,6 +50,6 @@ def deploy():
         # sudo('chown -R www-data:www-data %s' % newdir)
     # 重启Python服务和nginx服务器:
     with settings(warn_only=True):
-        sudo('supervisorctl stop hc_serv')
-        sudo('supervisorctl start hc_serv')
+        sudo('supervisorctl stop hc')
+        sudo('supervisorctl start hc')
         sudo('/etc/init.d/nginx reload')

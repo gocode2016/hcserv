@@ -8,13 +8,13 @@ from config.config import config
 
 local = True
 
-local = local
+local = not local
 
 if local:
     port = '5000'
     host = 'localhost'
 else:
-    port = '10005'
+    port = '80'
     host = config['server_host']
 
 
@@ -37,4 +37,4 @@ def verify(game_id):
     print(r)
 
 
-verify('1111111')
+verify('1724401')
