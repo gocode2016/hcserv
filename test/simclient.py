@@ -3,12 +3,12 @@ import datetime
 
 import requests
 
-from tools.util import md5
+from utils.tools import md5
 from config.config import config
 
 local = True
 
-local = not local
+local = local
 
 if local:
     port = '5000'
@@ -37,4 +37,4 @@ def verify(game_id):
     print(r)
 
 
-verify('1111121')
+verify('1111111')

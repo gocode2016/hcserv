@@ -164,3 +164,5 @@ class Table(metaclass=TableMeta):
 
         return (x for x in data)
 
+    def insert_many(self, data: list):
+        self.__table__.insert_many(data)

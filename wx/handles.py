@@ -129,9 +129,9 @@ def add_day_handle(user_id, self_id, user_input, user_input_before):
     user.game_id = user_input_before['game_id']
     data = '找不到该用户'
     if user.load():
-        now_stamp = datetime.now().timestamp()
-        if user.expire_time < now_stamp:
-            user.expire_time = now_stamp + timedelta(days=int(user_input)).total_seconds()
+        today_stamp = datetime.today().timestamp()
+        if user.expire_time < today_stamp:
+            user.expire_time = today_stamp + timedelta(days=int(user_input)).total_seconds()
         else:
             user.expire_time += timedelta(days=int(user_input)).total_seconds()
         data = user.__data__.copy()
