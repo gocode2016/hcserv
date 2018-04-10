@@ -7,10 +7,13 @@ from wx.tools import build_wx_response_xml_b
 from dao.myredis import redis_client
 from dao.models import *
 from config.config import config
+from datetime import date, datetime, timedelta
+import re
 
 admin_pswd = config['wx_admin_pswd']
 instruct_awake_func = {}
 instruct_handles_func = {}
+game_id_pattern = re.compile(r'^\d{7}$')
 
 
 def awake(instruct):
@@ -52,13 +55,13 @@ def cdkey_handle(user_id, self_id, user_input, user_input_before):
             self_id,
             resp
         )
-    else:
-        redis_client.hset(user_id, 'game_account', user_input)
-        return build_wx_response_xml_b(
-            user_id,
-            self_id,
-            "请输入CDKEY"
-        )
+
+    redis_client.hset(user_id, 'game_account', user_input)
+    return build_wx_response_xml_b(
+        user_id,
+        self_id,
+        "请输入CDKEY"
+    )
 
 
 @awake('1')
@@ -87,13 +90,65 @@ def add_day_handle(user_id, self_id, user_input, user_input_before):
             return build_wx_response_xml_b(
                 user_id,
                 self_id,
-                '请输入要充值的game_id与天数:如 100000-10表示给100000加上10天'
+                '请输入要充值的game_id'
             )
-    pass
+
+        redis_client.delete(user_id)
+        return build_wx_response_xml_b(
+            user_id,
+            self_id,
+            '密码错误'
+        )
+
+    # 输入游戏id
+    if 'game_id' not in user_input_before:
+        if not game_id_pattern.match(user_input):
+            redis_client.delete(user_id)
+            return build_wx_response_xml_b(
+                user_id,
+                self_id,
+                '输入游戏帐号格式错误'
+            )
+
+        redis_client.hset(user_id, 'game_id', user_input)
+        return build_wx_response_xml_b(
+            user_id,
+            self_id,
+            '请输入充值天数'
+        )
+
+    if not re.match(r'\d+', user_input):
+        redis_client.delete(user_id)
+        return build_wx_response_xml_b(
+            user_id,
+            self_id,
+            '输入天数格式错误'
+        )
+
+    user = UserInfo()
+    user.game_id = user_input_before['game_id']
+    data = '找不到该用户'
+    if user.load():
+        now_stamp = datetime.now().timestamp()
+        if user.expire_time < now_stamp:
+            user.expire_time = now_stamp + timedelta(days=int(user_input)).total_seconds()
+        else:
+            user.expire_time += timedelta(days=int(user_input)).total_seconds()
+        data = user.__data__.copy()
+        data['expire_time'] = str(date.fromtimestamp(user.expire_time))
+        data['last_login_time'] = str(date.fromtimestamp(user.last_login_time))
+        data['register_time'] = str(date.fromtimestamp(user.register_time))
+
+    redis_client.delete(user_id)
+    return build_wx_response_xml_b(
+        user_id,
+        self_id,
+        str(data)
+    )
 
 
 @awake('10001')
-def add_get_users_awake(user_id, self_id):
+def get_user_awake(user_id, self_id):
     return build_wx_response_xml_b(
         user_id,
         self_id,
@@ -102,29 +157,7 @@ def add_get_users_awake(user_id, self_id):
 
 
 @handle('10001')
-def add_get_users_handle(user_id, self_id, user_input, user_input_before):
-    if 'admin_pswd' not in user_input_before:
-        if user_input == admin_pswd:
-            redis_client.hset(user_id, 'admin_pswd', user_input)
-            return build_wx_response_xml_b(
-                user_id,
-                self_id,
-                '请输入要查询的起始位置与结束位置:如 1-100 表示查询1到100位'
-            )
-    # TODO 返回所有找找到的信息
-
-
-@awake('10002')
-def add_get_user_awake(user_id, self_id):
-    return build_wx_response_xml_b(
-        user_id,
-        self_id,
-        "请输入管理员密码"
-    )
-
-
-@handle('10002')
-def add_get_user_handle(user_id, self_id, user_input, user_input_before):
+def get_user_handle(user_id, self_id, user_input, user_input_before):
     if 'admin_pswd' not in user_input_before:
         if user_input == admin_pswd:
             redis_client.hset(user_id, 'admin_pswd', user_input)
@@ -133,7 +166,36 @@ def add_get_user_handle(user_id, self_id, user_input, user_input_before):
                 self_id,
                 '请输入要查询的game_id'
             )
-    # TODO 返回所有找找到的信息
+
+        redis_client.delete(user_id)
+        return build_wx_response_xml_b(
+            user_id,
+            self_id,
+            '密码错误'
+        )
+
+    if not game_id_pattern.match(user_input):
+        redis_client.delete(user_id)
+        return build_wx_response_xml_b(
+            user_id,
+            self_id,
+            '输入游戏帐号格式错误'
+        )
+
+    user = UserInfo()
+    user.game_id = int(user_input)
+    data = '未找到对应信息'
+    if user.load():
+        data = user.__data__.copy()
+        data['expire_time'] = str(date.fromtimestamp(user.expire_time))
+        data['last_login_time'] = str(date.fromtimestamp(user.last_login_time))
+        data['register_time'] = str(date.fromtimestamp(user.register_time))
+    redis_client.delete(user_id)
+    return build_wx_response_xml_b(
+        user_id,
+        self_id,
+        str(data)
+    )
 
 
 def init_model():
