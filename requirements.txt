@@ -1,0 +1,8 @@
+# runtime python=3.6.2
+
+requests==2.14.2
+pymongo==3.6.0
+flask==0.12.2
+gunicorn==19.7.1
+redis==2.10.6
+# fabric3==1.13.1.post1 // just for ide
