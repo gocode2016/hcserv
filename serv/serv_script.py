@@ -1,12 +1,11 @@
 # -*-coding:utf-8-*-
 
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from flask import jsonify, request
 from serv.serv_base import app
 from dao.models import UserInfo
 from utils.tools import md5
-
 
 game_id_pattern = re.compile(r'^\d{7}$')
 
@@ -75,5 +74,19 @@ def verify():
     })
 
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+@app.route('/hcserv/findall/<page>')
+def all_user_info(page):
+    page_num = 100
+    if not re.match(r'\d+', page):
+        return jsonify({'error': 'error page number'})
+    user = UserInfo()
+    page = int(page)
+    start = page_num * page
+    reps = []
+    for user_info in user.find_all(start=start, row=page_num):
+        user_info['expire_time'] = str(date.fromtimestamp(user_info.get('expire_time', 0)))
+        user_info['last_login_time'] = str(date.fromtimestamp(user_info.get('last_login_time', 0)))
+        user_info['register_time'] = str(date.fromtimestamp(user_info.get('register_time', 0)))
+        reps.append('<p>%s</p>' % str(user_info))
+    return ''.join(reps)
+

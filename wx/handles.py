@@ -117,7 +117,7 @@ def add_day_handle(user_id, self_id, user_input, user_input_before):
             '请输入充值天数'
         )
 
-    if not re.match(r'\d+', user_input):
+    if not re.match(r'-?\d+', user_input):
         redis_client.delete(user_id)
         return build_wx_response_xml_b(
             user_id,
