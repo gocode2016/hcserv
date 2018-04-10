@@ -54,7 +54,11 @@ def wx_reply():
         redis_client.hset(user_id, "instruct", receive)
         # 两分钟后过期
         redis_client.expire(user_id, 120)
-        return instruct_awake_func[receive](user_id, self_id)
+        return build_wx_response_xml_b(
+            user_id,
+            self_id,
+            instruct_awake_func[receive]()
+        )
 
     user_input_before = redis_client.hgetall(user_id)
     # data_before如果是None/0/False就返回None,不是的话就返回后面的
@@ -64,11 +68,14 @@ def wx_reply():
 
     # 如果缓存中存在已经输入过的合法指令，就调用相关handle处理
     if instruct:
-        return instruct_handles_func[instruct](
+        return build_wx_response_xml_b(
             user_id,
             self_id,
-            receive,
-            user_input_before
+            instruct_handles_func[instruct](
+                user_id,
+                receive,
+                user_input_before
+            )
         )
 
     # 如果是瞎几把输入的值，提示可以选择的输入选项

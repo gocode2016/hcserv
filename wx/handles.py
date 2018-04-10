@@ -2,8 +2,6 @@
 import functools
 import sys
 
-from wx.tools import build_wx_response_xml_b
-
 from dao.myredis import redis_client
 from dao.models import *
 from config.config import config
@@ -41,7 +39,7 @@ def handle(instruct):
 
 
 @handle('1')
-def cdkey_handle(user_id, self_id, user_input, user_input_before):
+def cdkey_handle(user_id, user_input, user_input_before):
     if user_input_before.get('game_account') is not None:
         # TODO 使用注册码
         is_cdkey_legal, day_remain = '', ''
@@ -50,80 +48,44 @@ def cdkey_handle(user_id, self_id, user_input, user_input_before):
         else:
             resp = '无效CDKEY'
         redis_client.delete(user_id)
-        return build_wx_response_xml_b(
-            user_id,
-            self_id,
-            resp
-        )
+        return resp
 
     redis_client.hset(user_id, 'game_account', user_input)
-    return build_wx_response_xml_b(
-        user_id,
-        self_id,
-        "请输入CDKEY"
-    )
+    return '请输入CDKEY'
 
 
 @awake('1')
-def cdkey_awake(user_id, self_id):
-    return build_wx_response_xml_b(
-        user_id,
-        self_id,
-        '请输入您的hustle castle游戏账号'
-    )
+def cdkey_awake():
+    return '请输入您的hustle castle游戏账号'
 
 
 @awake('10000')
-def add_day_awake(user_id, self_id):
-    return build_wx_response_xml_b(
-        user_id,
-        self_id,
-        '请输入管理员密码'
-    )
+def add_day_awake():
+    return '请输入管理员密码'
 
 
 @handle('10000')
-def add_day_handle(user_id, self_id, user_input, user_input_before):
+def add_day_handle(user_id, user_input, user_input_before):
     if 'admin_pswd' not in user_input_before:
         if user_input == admin_pswd:
             redis_client.hset(user_id, 'admin_pswd', user_input)
-            return build_wx_response_xml_b(
-                user_id,
-                self_id,
-                '请输入要充值的game_id'
-            )
+            return '请输入要充值的game_id'
 
         redis_client.delete(user_id)
-        return build_wx_response_xml_b(
-            user_id,
-            self_id,
-            '密码错误'
-        )
+        return '密码错误'
 
     # 输入游戏id
     if 'game_id' not in user_input_before:
         if not game_id_pattern.match(user_input):
             redis_client.delete(user_id)
-            return build_wx_response_xml_b(
-                user_id,
-                self_id,
-                '输入游戏帐号格式错误'
-            )
+            return '输入游戏帐号格式错误'
 
         redis_client.hset(user_id, 'game_id', user_input)
-        return build_wx_response_xml_b(
-            user_id,
-            self_id,
-            '请输入充值天数'
-        )
+        return '请输入充值天数'
 
     if not re.match(r'-?\d+', user_input):
         redis_client.delete(user_id)
-        return build_wx_response_xml_b(
-            user_id,
-            self_id,
-            '输入天数格式错误'
-        )
+        return '输入天数格式错误'
 
     user = UserInfo()
     user.game_id = user_input_before['game_id']
@@ -140,47 +102,27 @@ def add_day_handle(user_id, self_id, user_input, user_input_before):
         data['register_time'] = str(date.fromtimestamp(user.register_time))
 
     redis_client.delete(user_id)
-    return build_wx_response_xml_b(
-        user_id,
-        self_id,
-        str(data)
-    )
+    return str(data)
 
 
 @awake('10001')
-def get_user_awake(user_id, self_id):
-    return build_wx_response_xml_b(
-        user_id,
-        self_id,
-        "请输入管理员密码"
-    )
+def get_user_awake():
+    return "请输入管理员密码"
 
 
 @handle('10001')
-def get_user_handle(user_id, self_id, user_input, user_input_before):
+def get_user_handle(user_id, user_input, user_input_before):
     if 'admin_pswd' not in user_input_before:
         if user_input == admin_pswd:
             redis_client.hset(user_id, 'admin_pswd', user_input)
-            return build_wx_response_xml_b(
-                user_id,
-                self_id,
-                '请输入要查询的game_id'
-            )
+            return '请输入要查询的game_id'
 
         redis_client.delete(user_id)
-        return build_wx_response_xml_b(
-            user_id,
-            self_id,
-            '密码错误'
-        )
+        return '密码错误'
 
     if not game_id_pattern.match(user_input):
         redis_client.delete(user_id)
-        return build_wx_response_xml_b(
-            user_id,
-            self_id,
-            '输入游戏帐号格式错误'
-        )
+        return '输入游戏帐号格式错误'
 
     user = UserInfo()
     user.game_id = int(user_input)
@@ -191,11 +133,7 @@ def get_user_handle(user_id, self_id, user_input, user_input_before):
         data['last_login_time'] = str(date.fromtimestamp(user.last_login_time))
         data['register_time'] = str(date.fromtimestamp(user.register_time))
     redis_client.delete(user_id)
-    return build_wx_response_xml_b(
-        user_id,
-        self_id,
-        str(data)
-    )
+    return str(data)
 
 
 def init_model():
