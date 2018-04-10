@@ -66,7 +66,7 @@ def cdkey_awake(user_id, self_id):
     return build_wx_response_xml_b(
         user_id,
         self_id,
-        "请输入您的hustle castle游戏账号"
+        '请输入您的hustle castle游戏账号'
     )
 
 
@@ -75,17 +75,25 @@ def add_day_awake(user_id, self_id):
     return build_wx_response_xml_b(
         user_id,
         self_id,
-        "请输入管理员密码"
+        '请输入管理员密码'
     )
 
 
 @handle('10000')
 def add_day_handle(user_id, self_id, user_input, user_input_before):
+    if 'admin_pswd' not in user_input_before:
+        if user_input == admin_pswd:
+            redis_client.hset(user_id, 'admin_pswd', user_input)
+            return build_wx_response_xml_b(
+                user_id,
+                self_id,
+                '请输入要充值的game_id与天数:如 100000-10表示给100000加上10天'
+            )
     pass
 
 
 @awake('10001')
-def add_get_user_awake(user_id, self_id):
+def add_get_users_awake(user_id, self_id):
     return build_wx_response_xml_b(
         user_id,
         self_id,
@@ -94,8 +102,38 @@ def add_get_user_awake(user_id, self_id):
 
 
 @handle('10001')
+def add_get_users_handle(user_id, self_id, user_input, user_input_before):
+    if 'admin_pswd' not in user_input_before:
+        if user_input == admin_pswd:
+            redis_client.hset(user_id, 'admin_pswd', user_input)
+            return build_wx_response_xml_b(
+                user_id,
+                self_id,
+                '请输入要查询的起始位置与结束位置:如 1-100 表示查询1到100位'
+            )
+    # TODO 返回所有找找到的信息
+
+
+@awake('10002')
+def add_get_user_awake(user_id, self_id):
+    return build_wx_response_xml_b(
+        user_id,
+        self_id,
+        "请输入管理员密码"
+    )
+
+
+@handle('10002')
 def add_get_user_handle(user_id, self_id, user_input, user_input_before):
-    pass
+    if 'admin_pswd' not in user_input_before:
+        if user_input == admin_pswd:
+            redis_client.hset(user_id, 'admin_pswd', user_input)
+            return build_wx_response_xml_b(
+                user_id,
+                self_id,
+                '请输入要查询的game_id'
+            )
+    # TODO 返回所有找找到的信息
 
 
 def init_model():
