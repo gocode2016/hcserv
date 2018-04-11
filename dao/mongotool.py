@@ -113,7 +113,6 @@ class Table(metaclass=TableMeta):
             items = self.__table__.find_one(key_date)
 
         if items is None:
-            logging.warning('can not load data')
             return False
         else:
             self.__data__ = items

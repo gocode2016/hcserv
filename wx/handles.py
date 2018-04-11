@@ -93,7 +93,7 @@ def add_day_handle(user_id, user_input, user_input_before):
     if user.load():
         today_stamp = datetime.today().timestamp()
         if user.expire_time < today_stamp:
-            user.expire_time = today_stamp + timedelta(days=int(user_input)).total_seconds()
+            user.expire_time = int(today_stamp + timedelta(days=int(user_input)).total_seconds())
         else:
             user.expire_time += int(timedelta(days=int(user_input)).total_seconds())
         data = user.__data__.copy()

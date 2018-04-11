@@ -64,7 +64,6 @@ def wx_reply():
     # data_before如果是None/0/False就返回None,不是的话就返回后面的
     # 这里有坑。。。{}空字典也是作为False来处理的。。。（包含所有为空的集合
     instruct = user_input_before and user_input_before.get("instruct")
-    logging.info(instruct)
 
     # 如果缓存中存在已经输入过的合法指令，就调用相关handle处理
     if instruct:
