@@ -8,10 +8,11 @@ from config.config import config
 from datetime import date, datetime, timedelta
 import re
 
-admin_pswd = config['wx_admin_pswd']
 instruct_awake_func = {}
 instruct_handles_func = {}
-game_id_pattern = re.compile(r'^\d{7}$')
+_admin_pswd = config['wx_admin_pswd']
+_game_id_pattern = re.compile(r'^\d{7}$')
+_admin_users_redis_key = 'wx_admin_user'
 
 
 def awake(instruct):
@@ -55,20 +56,24 @@ def cdkey_handle(user_id, user_input, user_input_before):
 
 
 @awake('1')
-def cdkey_awake():
+def cdkey_awake(user_id):
     return '请输入您的hustle castle游戏账号'
 
 
 @awake('10000')
-def add_day_awake():
+def add_day_awake(user_id):
+    if redis_client.sismember(_admin_users_redis_key, user_id):
+        redis_client.hset(user_id, 'admin_pswd', _admin_pswd)
+        return '请输入要充值的game_id'
     return '请输入管理员密码'
 
 
 @handle('10000')
 def add_day_handle(user_id, user_input, user_input_before):
     if 'admin_pswd' not in user_input_before:
-        if user_input == admin_pswd:
+        if user_input == _admin_pswd:
             redis_client.hset(user_id, 'admin_pswd', user_input)
+            redis_client.sadd(_admin_users_redis_key, user_id)
             return '请输入要充值的game_id'
 
         redis_client.delete(user_id)
@@ -76,7 +81,7 @@ def add_day_handle(user_id, user_input, user_input_before):
 
     # 输入游戏id
     if 'game_id' not in user_input_before:
-        if not game_id_pattern.match(user_input):
+        if not _game_id_pattern.match(user_input):
             redis_client.delete(user_id)
             return '输入游戏帐号格式错误'
 
@@ -96,6 +101,7 @@ def add_day_handle(user_id, user_input, user_input_before):
             user.expire_time = int(today_stamp + timedelta(days=int(user_input)).total_seconds())
         else:
             user.expire_time += int(timedelta(days=int(user_input)).total_seconds())
+        user.commit()
         data = user.__data__.copy()
         data['expire_time'] = str(date.fromtimestamp(data.get('expire_time', 0)))
         data['last_login_time'] = str(date.fromtimestamp(data.get('last_login_time', 0)))
@@ -106,21 +112,21 @@ def add_day_handle(user_id, user_input, user_input_before):
 
 
 @awake('10001')
-def get_user_awake():
+def get_user_awake(user_id):
     return "请输入管理员密码"
 
 
 @handle('10001')
 def get_user_handle(user_id, user_input, user_input_before):
     if 'admin_pswd' not in user_input_before:
-        if user_input == admin_pswd:
+        if user_input == _admin_pswd:
             redis_client.hset(user_id, 'admin_pswd', user_input)
             return '请输入要查询的game_id'
 
         redis_client.delete(user_id)
         return '密码错误'
 
-    if not game_id_pattern.match(user_input):
+    if not _game_id_pattern.match(user_input):
         redis_client.delete(user_id)
         return '输入游戏帐号格式错误'
 

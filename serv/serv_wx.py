@@ -57,7 +57,7 @@ def wx_reply():
         return build_wx_response_xml_b(
             user_id,
             self_id,
-            instruct_awake_func[receive]()
+            instruct_awake_func[receive](user_id)
         )
 
     user_input_before = redis_client.hgetall(user_id)
