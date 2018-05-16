@@ -11,7 +11,7 @@ import re
 instruct_awake_func = {}
 instruct_handles_func = {}
 _admin_pswd = config['wx_admin_pswd']
-_game_id_pattern = re.compile(r'^\d{7}$')
+_game_id_pattern = re.compile(r'^\d{7,8}$')
 _admin_users_redis_key = 'wx_admin_user'
 
 

@@ -8,7 +8,7 @@ from config.config import config
 
 local = True
 
-local = not local
+# local = not local
 
 if local:
     port = '5000'
@@ -37,4 +37,4 @@ def verify(game_id):
     print(r)
 
 
-verify('1724401')
+verify('17244031')

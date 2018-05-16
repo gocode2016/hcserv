@@ -7,7 +7,7 @@ from serv.serv_base import app
 from dao.models import UserInfo
 from utils.tools import md5
 
-game_id_pattern = re.compile(r'^\d{7}$')
+game_id_pattern = re.compile(r'^\d{7,8}$')
 
 
 @app.route('/hcserv/verify')
