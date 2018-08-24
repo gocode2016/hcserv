@@ -11,7 +11,6 @@ import re
 instruct_awake_func = {}
 instruct_handles_func = {}
 _admin_pswd = config['wx_admin_pswd']
-_game_id_pattern = re.compile(r'^\d{7,8}$')
 _admin_users_redis_key = 'wx_admin_user'
 
 
@@ -81,9 +80,6 @@ def add_day_handle(user_id, user_input, user_input_before):
 
     # 输入游戏id
     if 'game_id' not in user_input_before:
-        if not _game_id_pattern.match(user_input):
-            redis_client.delete(user_id)
-            return '输入游戏帐号格式错误'
 
         redis_client.hset(user_id, 'game_id', user_input)
         return '请输入充值天数'
@@ -125,10 +121,6 @@ def get_user_handle(user_id, user_input, user_input_before):
 
         redis_client.delete(user_id)
         return '密码错误'
-
-    if not _game_id_pattern.match(user_input):
-        redis_client.delete(user_id)
-        return '输入游戏帐号格式错误'
 
     user = UserInfo()
     user.game_id = int(user_input)

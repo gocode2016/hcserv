@@ -8,7 +8,7 @@ from config.config import config
 
 local = True
 
-# local = not local
+local = not local
 
 if local:
     port = '5000'

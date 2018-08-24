@@ -7,8 +7,6 @@ from serv.serv_base import app
 from dao.models import UserInfo
 from utils.tools import md5
 
-game_id_pattern = re.compile(r'^\d{7,8}$')
-
 
 @app.route('/hcserv/verify')
 def verify():
@@ -18,8 +16,7 @@ def verify():
     request_time = request.args.get('time')
     if game_id is None \
             or request_secret is None \
-            or request_time is None \
-            or game_id_pattern.match(game_id) is None:
+            or request_time is None:
         return jsonify({'error': 'not enough param'})
 
     # 验证请求有效性

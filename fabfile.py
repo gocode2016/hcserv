@@ -26,7 +26,7 @@ def build():
 
 
 _REMOTE_TMP_TAR = '/tmp/%s' % _TAR_FILE
-_REMOTE_BASE_DIR = '/home/yang/code/python/hcserv'
+_REMOTE_BASE_DIR = '/home/yang/serv/hcserv'
 
 
 def deploy():
