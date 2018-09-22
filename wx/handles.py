@@ -3,7 +3,7 @@ import functools
 import sys
 
 from dao.myredis import redis_client
-from dao.models import *
+from models.models import *
 from config.config import config
 from datetime import date, datetime, timedelta
 import re

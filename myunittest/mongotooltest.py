@@ -1,7 +1,7 @@
 import unittest
 
 from dao.mongotool import Table, AssistColumnClass
-from tools.myexception import MongoDBTypeNotMatchException, MongoAssistInitialException
+from dao.my_mongodb_exception import MongoDBTypeNotMatchException, MongoAssistInitialException
 
 
 class TestMongoTool(unittest.TestCase):

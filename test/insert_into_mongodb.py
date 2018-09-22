@@ -1,4 +1,4 @@
-from dao.models import *
+from models.models import *
 
 with open('../dist/tmp.txt') as f:
     st = set()

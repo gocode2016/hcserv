@@ -4,7 +4,7 @@ import re
 from datetime import datetime, timedelta, date
 from flask import jsonify, request
 from serv.serv_base import app
-from dao.models import UserInfo
+from models.models import UserInfo
 from utils.tools import md5
 
 

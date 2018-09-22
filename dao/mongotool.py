@@ -4,7 +4,7 @@ import logging
 from pymongo import MongoClient
 
 from config.config import config
-from utils.myexception import MongoDBTypeNotMatchException, MongoAssistInitialException
+from dao.my_mongodb_exception import MongoDBTypeNotMatchException, MongoAssistInitialException
 
 _uri = 'mongodb://%s:27017/' % config['db_host']
 _db_name = config['db_name']
@@ -31,11 +31,17 @@ class TableMeta(type):
     如果此前已有连接，则采用此前的连接
     如果此前不存在连接，则新建一个连接
     """
-
     def __new__(mcs, name, bases, attrs):
+        """
+        该方法在发现新的类以该class作为metaclass时运行，运行时间晚于新
+        类中的类代码（写在类中，但不在方法内的代码）
+        :param name:类的名字
+        :param bases:类的基类
+        :param attrs:类的类属性（除了自己定义的外，还有一些自有的类属性）
+        :return:
+        """
         if name == 'Table':
             return type.__new__(mcs, name, bases, attrs)
-
         # connect table to attrs['table']
         table_name = attrs.get('__table__', None) or name
         if table_name not in _tables:
