@@ -24,7 +24,7 @@ class TestMongoTool(unittest.TestCase):
             u = ErrorColumn()
             u.id = 123
 
-    def test_error_type_(self):
+    def test_error_type(self):
         """
         测试column加入限制以后，是否能正确检测出错误
         :return:
@@ -47,11 +47,12 @@ class TestMongoTool(unittest.TestCase):
             __table__ = 'test'
             id = AssistColumnClass(int)
             str_value = AssistColumnClass(str)
-            normal_value = AssistColumnClass()
+            normal_value = AssistColumnClass(is_not_none=True)
 
         u = TestClass()
         u.id = 1
         u.str_value = '1'
+        self.assertEqual(u.commit(), False)
         u.normal_value = 1
         u.commit()
         u.delete_all()

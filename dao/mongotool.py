@@ -17,11 +17,12 @@ class AssistColumnClass:
     """
     该类用于在申明table时作为辅助列
     """
-    def __init__(self, type_=None):
+    def __init__(self, type_=None, is_not_none=False):
         if type_ is not None:
             if type(type_) is not type:
                 raise MongoAssistInitialException('type_ must be a `type`, such as `int`')
         self.type_ = type_
+        self.is_not_none = is_not_none
 
 
 class TableMeta(type):
@@ -49,6 +50,7 @@ class TableMeta(type):
         attrs['__table__'] = _tables[table_name]
         attrs['__table_name__'] = table_name
         attrs['__type_map__'] = {}
+        attrs['__is_not_none_fields__'] = []
 
         # delete all assist attr
         tmp = []
@@ -61,6 +63,8 @@ class TableMeta(type):
                 # 如果辅助类中定义了类型的话，就把类型记下来，
                 # 方便之后做限制
                 attrs['__type_map__'][k] = attrs[k].type_
+            if attrs[k].is_not_none:
+                attrs['__is_not_none_fields__'].append(k)
             attrs.pop(k)
 
         return type.__new__(mcs, name, bases, attrs)
@@ -128,6 +132,11 @@ class Table(metaclass=TableMeta):
         if self.__data__ is None:
             logging.warning('can not commit to mongodb since date is None')
             return False
+
+        for field_name in self.__is_not_none_fields__:
+            if field_name not in self.__data__:
+                logging.warning('%s can not be none when commit' % field_name)
+                return False
 
         if self._id is not None:
             self.__table__.replace_one({'_id': self._id}, self.__data__)
